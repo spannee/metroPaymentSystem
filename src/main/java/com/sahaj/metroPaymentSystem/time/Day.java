@@ -1,8 +1,12 @@
 package com.sahaj.metroPaymentSystem.time;
 
+import com.sahaj.metroPaymentSystem.Exceptions.TigerCardException;
+import com.sahaj.metroPaymentSystem.enums.ErrorMessages;
 import lombok.Getter;
 import lombok.NonNull;
+import lombok.ToString;
 
+@ToString
 public class Day {
 
     public final static int MONDAY = 1;
@@ -22,10 +26,11 @@ public class Day {
     @Getter
     private final int dayId;
 
-    public Day(String day) throws Exception {
+    @NonNull
+    public Day(String day) throws TigerCardException {
         int dayId = getDayValue(day);
         if (dayId == -1)
-            throw new Exception("Test");
+            throw new TigerCardException(ErrorMessages.INVALID_DAY.getErrorMessage());
         this.dayId = dayId;
     }
 
@@ -33,7 +38,6 @@ public class Day {
         return this.dayId == 6 || this.dayId == 7;
     }
 
-    @NonNull
     private int getDayValue(String day) {
         switch(day) {
             case "Monday":

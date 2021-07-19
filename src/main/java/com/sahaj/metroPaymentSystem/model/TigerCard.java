@@ -1,9 +1,11 @@
 package com.sahaj.metroPaymentSystem.model;
 
 import com.sahaj.metroPaymentSystem.calculationStrategy.FareCalculator;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
 
+@Slf4j
 public class TigerCard {
 
     private static TigerCard instance;
@@ -18,7 +20,9 @@ public class TigerCard {
     }
 
     public int getTotalFare() {
-        return fareCalculator.fareCalculation(journey);
+        int totalFare = fareCalculator.fareCalculation(journey);
+        log.info("The total far this trip is {}", totalFare);
+        return totalFare;
     }
 
     public static TigerCard getInstance(List<Trip> journey, FareCalculator fareCalculator) {
@@ -30,6 +34,10 @@ public class TigerCard {
             }
         }
         return instance;
+    }
+
+    public static void destroy() {
+        instance = null;
     }
 
 }

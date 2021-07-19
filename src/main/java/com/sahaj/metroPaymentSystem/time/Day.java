@@ -29,8 +29,6 @@ public class Day {
     @NonNull
     public Day(String day) throws TigerCardException {
         int dayId = getDayValue(day);
-        if (dayId == -1)
-            throw new TigerCardException(ErrorMessages.INVALID_DAY.getErrorMessage());
         this.dayId = dayId;
     }
 
@@ -38,7 +36,7 @@ public class Day {
         return this.dayId == 6 || this.dayId == 7;
     }
 
-    private int getDayValue(String day) {
+    private int getDayValue(String day) throws TigerCardException {
         switch(day) {
             case "Monday":
                 return MONDAY;
@@ -55,7 +53,7 @@ public class Day {
             case "Sunday":
                 return SUNDAY;
             default:
-                return -1;
+                throw new TigerCardException(ErrorMessages.INVALID_DAY.getErrorMessage());
         }
     }
 

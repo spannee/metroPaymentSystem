@@ -16,7 +16,7 @@ public class CapLimitBasedCalculator implements FareCalculator {
         return calculateFareForMultipleWeeks(journey);
     }
 
-    private int calculateFareForMultipleWeeks(List<Trip> journey) {
+    public int calculateFareForMultipleWeeks(List<Trip> journey) {
         int totalFare = 0;
         List<Trip> weeklyTripList = new ArrayList<>();
         for (Trip trip: journey) {
@@ -34,7 +34,7 @@ public class CapLimitBasedCalculator implements FareCalculator {
         return totalFare;
     }
 
-    private int calculateFareForOneWeek(Map<Integer, List<Trip>> weeklyTrips) {
+    public int calculateFareForOneWeek(Map<Integer, List<Trip>> weeklyTrips) {
         int weeklyFare = 0;
         int weeklyFareAfterCapping = 0;
         boolean hasTravelledFarther = hasTravelledFurther(weeklyTrips);
@@ -46,7 +46,7 @@ public class CapLimitBasedCalculator implements FareCalculator {
         return weeklyFareAfterCapping;
     }
 
-    private int weeklyCapLimitBasedCalculation(List<Trip> trips, int weeklyFare, boolean hasTravelledFarther) {
+    public int weeklyCapLimitBasedCalculation(List<Trip> trips, int weeklyFare, boolean hasTravelledFarther) {
         int dayFare = trips.stream().mapToInt(Trip::getFare).sum();
         int weeklyFareBeforeCurrentDay = weeklyFare - dayFare;
         for (Trip trip: trips) {
@@ -65,7 +65,7 @@ public class CapLimitBasedCalculator implements FareCalculator {
         return weeklyFareBeforeCurrentDay;
     }
 
-    private int calculateFareForOneDay(List<Trip> dayTrips, boolean hasTravelledFarther) {
+    public int calculateFareForOneDay(List<Trip> dayTrips, boolean hasTravelledFarther) {
         int oneDayFare = 0;
         for(Trip trip: dayTrips) {
             int tripFare = dailyCapLimitBasedCalculation(trip, oneDayFare, hasTravelledFarther);
@@ -75,7 +75,7 @@ public class CapLimitBasedCalculator implements FareCalculator {
         return oneDayFare;
     }
 
-    private int dailyCapLimitBasedCalculation(Trip trip, int oneDayFare, boolean hasTravelledFarther) {
+    public int dailyCapLimitBasedCalculation(Trip trip, int oneDayFare, boolean hasTravelledFarther) {
         int dailyFixedCapLimit = hasTravelledFarther ?
                 getDailyFixedCapLimit(ZoneType.ZONE_ONE, ZoneType.ZONE_TWO):
                 getDailyFixedCapLimit(trip.getFromZone().getZoneType(), trip.getToZone().getZoneType());

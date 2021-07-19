@@ -1,7 +1,9 @@
 package com.sahaj.metroPaymentSystem.model;
 
+import com.sahaj.metroPaymentSystem.enums.ZoneType;
+
 public class ZoneTwo extends Zone {
-    public ZoneTwo(int id) throws Exception {
-        super(id);
+    public ZoneTwo() throws Exception {
+        super(ZoneType.ZONE_TWO.getId());
     }
 }

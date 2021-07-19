@@ -18,4 +18,15 @@ public abstract class Zone {
         this.zoneType = zoneType;
         this.id = id;
     }
+
+    public static Zone getZone(int zoneId) throws Exception {
+        switch (zoneId) {
+            case 1:
+                return new ZoneOne();
+            case 2:
+                return new ZoneTwo();
+            default:
+                throw new Exception("Test");
+        }
+    }
 }

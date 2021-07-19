@@ -2,10 +2,13 @@ package com.sahaj.metroPaymentSystem.model;
 
 import com.sahaj.metroPaymentSystem.enums.ZoneType;
 import com.sahaj.metroPaymentSystem.repository.FareRepository;
+import com.sahaj.metroPaymentSystem.time.Day;
 import com.sahaj.metroPaymentSystem.time.Event;
+import com.sahaj.metroPaymentSystem.time.Time;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.time.LocalTime;
 import java.util.Objects;
 
 @Getter
@@ -19,14 +22,28 @@ public class Trip {
     @Setter
     private int fare;
 
-    public Trip(Event event, Zone fromZone, Zone toZone, boolean isNewWeek) throws Exception {
-        if (Objects.isNull(event) || Objects.isNull(event) || Objects.isNull(event))
+    private Trip(Event event, Zone fromZone, Zone toZone, boolean isNewWeek) throws Exception {
+        if (Objects.isNull(event) || Objects.isNull(fromZone) || Objects.isNull(toZone))
             throw new Exception("Test");
         this.event = event;
         this.fromZone = fromZone;
         this.toZone = toZone;
         this.fare = getFixedFare(event, fromZone, toZone);
         this.isNewWeek = isNewWeek;
+    }
+
+    public static Trip addTrip(String dayStr, int hour, int minute, int fromZoneId, int toZoneId, boolean isNewWeek) {
+        Trip trip = null;
+        try {
+            Day day = new Day(dayStr);
+            Time time = new Time(LocalTime.of(hour, minute));
+            Event event = new Event(day, time);
+
+            trip = new Trip(event, Zone.getZone(fromZoneId), Zone.getZone(toZoneId), isNewWeek);
+        } catch (Exception e) {
+
+        }
+        return trip;
     }
 
     private int getFixedFare(Event event, Zone fromZone, Zone toZone) {

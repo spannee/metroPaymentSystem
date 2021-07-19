@@ -7,7 +7,7 @@ import lombok.Getter;
 
 import java.time.LocalTime;
 
-@AllArgsConstructor(access=AccessLevel.PUBLIC)
+@AllArgsConstructor(access = AccessLevel.PUBLIC)
 public class Time {
 
     @Getter

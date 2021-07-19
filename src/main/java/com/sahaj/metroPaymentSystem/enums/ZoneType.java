@@ -1,9 +1,10 @@
 package com.sahaj.metroPaymentSystem.enums;
 
+import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
-@AllArgsConstructor
+@AllArgsConstructor(access = AccessLevel.PUBLIC)
 public enum ZoneType {
 
     ZONE_ONE(1),

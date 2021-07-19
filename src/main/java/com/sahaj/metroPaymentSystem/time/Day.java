@@ -20,18 +20,17 @@ public class Day {
     public final static int SUNDAY = 7;
 
     @Getter
-    private final int day;
+    private final int dayId;
 
-    @NonNull
     public Day(String day) throws Exception {
-        int dayVal = getDayValue(day);
-        if (dayVal == -1)
+        int dayId = getDayValue(day);
+        if (dayId == -1)
             throw new Exception("Test");
-        this.day = dayVal;
+        this.dayId = dayId;
     }
 
     public boolean isWeekend() {
-        return this.day == 1 || this.day == 2;
+        return this.dayId == 6 || this.dayId == 7;
     }
 
     @NonNull

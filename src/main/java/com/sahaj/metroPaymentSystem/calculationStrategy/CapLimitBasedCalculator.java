@@ -3,9 +3,9 @@ package com.sahaj.metroPaymentSystem.calculationStrategy;
 import com.sahaj.metroPaymentSystem.enums.ZoneType;
 import com.sahaj.metroPaymentSystem.model.Trip;
 import com.sahaj.metroPaymentSystem.repository.CapLimitRepository;
-import com.sahaj.metroPaymentSystem.time.Day;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -21,65 +21,80 @@ public class CapLimitBasedCalculator implements FareCalculator {
         List<Trip> weeklyTripList = new ArrayList<>();
         for (Trip trip: journey) {
             if (trip.isNewWeek()) {
-                Map<Day, List<Trip>> weeklyTrips = weeklyTripList.stream().collect(
-                        Collectors.groupingBy(weeklyTrip -> weeklyTrip.getEvent().getDay()));
+                Map<Integer, List<Trip>> weeklyTrips = groupByDay(weeklyTripList);
                 totalFare += calculateFareForOneWeek(weeklyTrips);
                 weeklyTripList = new ArrayList<>();
             }
             weeklyTripList.add(trip);
         }
+        if (!weeklyTripList.isEmpty()) {
+            Map<Integer, List<Trip>> weeklyTrips = groupByDay(weeklyTripList);
+            totalFare += calculateFareForOneWeek(weeklyTrips);
+        }
         return totalFare;
     }
 
-    private int calculateFareForOneWeek(Map<Day, List<Trip>> weeklyTrips) {
+    private int calculateFareForOneWeek(Map<Integer, List<Trip>> weeklyTrips) {
         int weeklyFare = 0;
-        for (Map.Entry<Day, List<Trip>> dayTrips : weeklyTrips.entrySet()) {
+        int weeklyFareAfterCapping = 0;
+        boolean hasTravelledFarther = hasTravelledFurther(weeklyTrips);
+        for (Map.Entry<Integer, List<Trip>> dayTrips : weeklyTrips.entrySet()) {
             List<Trip> oneDayTrips = dayTrips.getValue();
-            boolean hasTravelledFarther = hasTravelledFurther(oneDayTrips);
-            calculateFareForOneDay(oneDayTrips, hasTravelledFarther);
-            weeklyFare += weeklyCapLimitBasedCalculation(oneDayTrips, weeklyFare, hasTravelledFarther);
-
+            weeklyFare += calculateFareForOneDay(oneDayTrips, hasTravelledFarther);
+            weeklyFareAfterCapping = weeklyCapLimitBasedCalculation(oneDayTrips, weeklyFare, hasTravelledFarther);
         }
-        return weeklyFare;
+        return weeklyFareAfterCapping;
     }
 
     private int weeklyCapLimitBasedCalculation(List<Trip> trips, int weeklyFare, boolean hasTravelledFarther) {
+        int dayFare = trips.stream().mapToInt(Trip::getFare).sum();
+        int weeklyFareBeforeCurrentDay = weeklyFare - dayFare;
         for (Trip trip: trips) {
             int weeklyFixedCapLimit = hasTravelledFarther ?
-                    getWeeklyFixedCapLimit(trip.getFromZone().getZoneType(), trip.getToZone().getZoneType()) :
-                    getWeeklyFixedCapLimit(ZoneType.ZONE_ONE, ZoneType.ZONE_TWO);
-            if (weeklyFare + trip.getFare() < weeklyFixedCapLimit) {
-                weeklyFare += trip.getFare();
+                    getWeeklyFixedCapLimit(ZoneType.ZONE_ONE, ZoneType.ZONE_TWO) :
+                    getWeeklyFixedCapLimit(trip.getFromZone().getZoneType(), trip.getToZone().getZoneType());
+
+            if (weeklyFareBeforeCurrentDay + trip.getFare() >= weeklyFixedCapLimit) {
+                int reducedFare = weeklyFixedCapLimit - weeklyFareBeforeCurrentDay;
+                trip.setFare(reducedFare);
+                weeklyFareBeforeCurrentDay += reducedFare;
             } else {
-                trip.setFare(weeklyFixedCapLimit - weeklyFare);
+                weeklyFareBeforeCurrentDay += trip.getFare();
             }
         }
-        return weeklyFare;
+        return weeklyFareBeforeCurrentDay;
     }
 
-    private void calculateFareForOneDay(List<Trip> dayTrips, boolean hasTravelledFarther) {
+    private int calculateFareForOneDay(List<Trip> dayTrips, boolean hasTravelledFarther) {
         int oneDayFare = 0;
         for(Trip trip: dayTrips) {
             int tripFare = dailyCapLimitBasedCalculation(trip, oneDayFare, hasTravelledFarther);
             trip.setFare(tripFare);
             oneDayFare += tripFare;
         }
+        return oneDayFare;
     }
 
     private int dailyCapLimitBasedCalculation(Trip trip, int oneDayFare, boolean hasTravelledFarther) {
         int dailyFixedCapLimit = hasTravelledFarther ?
-                getDailyFixedCapLimit(trip.getFromZone().getZoneType(), trip.getToZone().getZoneType()) :
-                getDailyFixedCapLimit(ZoneType.ZONE_ONE, ZoneType.ZONE_TWO);
+                getDailyFixedCapLimit(ZoneType.ZONE_ONE, ZoneType.ZONE_TWO):
+                getDailyFixedCapLimit(trip.getFromZone().getZoneType(), trip.getToZone().getZoneType());
         if (oneDayFare + trip.getFare() >= dailyFixedCapLimit) {
             return dailyFixedCapLimit - oneDayFare;
         }
         return trip.getFare();
     }
 
-    private boolean hasTravelledFurther(List<Trip> trips) {
-        return trips.stream().anyMatch(trip -> (trip.getFromZone().getZoneType() == ZoneType.ZONE_ONE &&
+    private Map<Integer, List<Trip>> groupByDay(List<Trip> weeklyTripList) {
+        return weeklyTripList.stream().collect(
+                Collectors.groupingBy(weeklyTrip -> weeklyTrip.getEvent().getDay().getDayId(),
+                        LinkedHashMap::new, Collectors.toList()));
+    }
+
+    private boolean hasTravelledFurther(Map<Integer, List<Trip>> weeklyTrips) {
+        return weeklyTrips.entrySet().stream().anyMatch(integerListEntry -> integerListEntry.getValue().stream().anyMatch(trip -> (trip.getFromZone().getZoneType() == ZoneType.ZONE_ONE &&
                 trip.getToZone().getZoneType() == ZoneType.ZONE_TWO) || (trip.getFromZone().getZoneType() == ZoneType.ZONE_TWO &&
-                trip.getToZone().getZoneType() == ZoneType.ZONE_ONE));
+                trip.getToZone().getZoneType() == ZoneType.ZONE_ONE)));
     }
 
     private int getDailyFixedCapLimit(ZoneType fromZoneType, ZoneType toZoneType) {

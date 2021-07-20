@@ -36,7 +36,7 @@ public class Day {
         return this.dayId == 6 || this.dayId == 7;
     }
 
-    private int getDayValue(String day) throws TigerCardException {
+    public static int getDayValue(String day) throws TigerCardException {
         switch(day) {
             case "Monday":
                 return MONDAY;

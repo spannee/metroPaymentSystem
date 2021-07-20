@@ -13,15 +13,11 @@ import java.util.List;
 public class MetroPaymentApp {
 
     public static void main(String[] args) {
-        //Weekly Trip Sample
-        List<Trip> journey = weeklyTrip();
+        FareCalculator fareCalculator = new CapLimitBasedCalculator();
 
         //Daily Trip Sample
-        //List<Trip> journey = dailyTrip();
-
-        FareCalculator fareCalculator = new CapLimitBasedCalculator();
+        List<Trip> journey = weeklyTrip();
         TigerCard tigerCard = TigerCard.getInstance(journey, fareCalculator);
-
         System.out.println("Total Fare - " + tigerCard.getTotalFare());
     }
 

@@ -2,7 +2,6 @@ package com.sahaj.metroPaymentSystem.calculationStrategy;
 
 import com.sahaj.metroPaymentSystem.enums.ZoneType;
 import com.sahaj.metroPaymentSystem.model.Trip;
-import com.sahaj.metroPaymentSystem.repository.CapLimitRepository;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -12,10 +11,20 @@ import java.util.stream.Collectors;
 
 public class CapLimitBasedCalculator implements FareCalculator {
 
+    /**
+     * Cap Limit Based Fare Calculator
+     * @param journey
+     * @return
+     */
     public int fareCalculation(List<Trip> journey) {
         return calculateFareForMultipleWeeks(journey);
     }
 
+    /**
+     * Calculates the cost for the entire trip
+     * @param journey
+     * @return
+     */
     public int calculateFareForMultipleWeeks(List<Trip> journey) {
         int totalFare = 0;
         List<Trip> weeklyTripList = new ArrayList<>();
@@ -34,6 +43,11 @@ public class CapLimitBasedCalculator implements FareCalculator {
         return totalFare;
     }
 
+    /**
+     * Calculates the cost for one particular week
+     * @param weeklyTrips
+     * @return
+     */
     public int calculateFareForOneWeek(Map<Integer, List<Trip>> weeklyTrips) {
         int weeklyFare = 0;
         int weeklyFareAfterCapping = 0;
@@ -46,13 +60,20 @@ public class CapLimitBasedCalculator implements FareCalculator {
         return weeklyFareAfterCapping;
     }
 
+    /**
+     * Applies cap to the overall fare for the given week and adjusts the fare of each trip with the discounted price
+     * @param trips
+     * @param weeklyFare
+     * @param hasTravelledFarther
+     * @return
+     */
     public int weeklyCapLimitBasedCalculation(List<Trip> trips, int weeklyFare, boolean hasTravelledFarther) {
         int dayFare = trips.stream().mapToInt(Trip::getFare).sum();
         int weeklyFareBeforeCurrentDay = weeklyFare - dayFare;
         for (Trip trip: trips) {
             int weeklyFixedCapLimit = hasTravelledFarther ?
-                    getWeeklyFixedCapLimit(ZoneType.ZONE_ONE, ZoneType.ZONE_TWO) :
-                    getWeeklyFixedCapLimit(trip.getFromZone().getZoneType(), trip.getToZone().getZoneType());
+                    trip.getWeeklyFixedCapLimit(ZoneType.ZONE_ONE, ZoneType.ZONE_TWO) :
+                    trip.getWeeklyFixedCapLimit(trip.getFromZone().getZoneType(), trip.getToZone().getZoneType());
 
             if (weeklyFareBeforeCurrentDay + trip.getFare() >= weeklyFixedCapLimit) {
                 int reducedFare = weeklyFixedCapLimit - weeklyFareBeforeCurrentDay;
@@ -65,6 +86,12 @@ public class CapLimitBasedCalculator implements FareCalculator {
         return weeklyFareBeforeCurrentDay;
     }
 
+    /**
+     * Calculates the cost for one particular day
+     * @param dayTrips
+     * @param hasTravelledFarther
+     * @return
+     */
     public int calculateFareForOneDay(List<Trip> dayTrips, boolean hasTravelledFarther) {
         int oneDayFare = 0;
         for(Trip trip: dayTrips) {
@@ -75,49 +102,43 @@ public class CapLimitBasedCalculator implements FareCalculator {
         return oneDayFare;
     }
 
+    /**
+     * Applies cap to the overall fare for the given day and adjusts the fare of each trip with the discounted price
+     * @param trip
+     * @param oneDayFare
+     * @param hasTravelledFarther
+     * @return
+     */
     public int dailyCapLimitBasedCalculation(Trip trip, int oneDayFare, boolean hasTravelledFarther) {
         int dailyFixedCapLimit = hasTravelledFarther ?
-                getDailyFixedCapLimit(ZoneType.ZONE_ONE, ZoneType.ZONE_TWO):
-                getDailyFixedCapLimit(trip.getFromZone().getZoneType(), trip.getToZone().getZoneType());
+                trip.getDailyFixedCapLimit(ZoneType.ZONE_ONE, ZoneType.ZONE_TWO):
+                trip.getDailyFixedCapLimit(trip.getFromZone().getZoneType(), trip.getToZone().getZoneType());
         if (oneDayFare + trip.getFare() >= dailyFixedCapLimit) {
             return dailyFixedCapLimit - oneDayFare;
         }
         return trip.getFare();
     }
 
+    /**
+     *
+     * @param weeklyTripList
+     * @return
+     */
     private Map<Integer, List<Trip>> groupByDay(List<Trip> weeklyTripList) {
         return weeklyTripList.stream().collect(
                 Collectors.groupingBy(weeklyTrip -> weeklyTrip.getEvent().getDay().getDayId(),
                         LinkedHashMap::new, Collectors.toList()));
     }
 
+    /**
+     *
+     * @param weeklyTrips
+     * @return
+     */
     private boolean hasTravelledFurther(Map<Integer, List<Trip>> weeklyTrips) {
         return weeklyTrips.entrySet().stream().anyMatch(integerListEntry -> integerListEntry.getValue().stream().anyMatch(trip -> (trip.getFromZone().getZoneType() == ZoneType.ZONE_ONE &&
                 trip.getToZone().getZoneType() == ZoneType.ZONE_TWO) || (trip.getFromZone().getZoneType() == ZoneType.ZONE_TWO &&
                 trip.getToZone().getZoneType() == ZoneType.ZONE_ONE)));
     }
 
-    private int getDailyFixedCapLimit(ZoneType fromZoneType, ZoneType toZoneType) {
-        if ((fromZoneType == ZoneType.ZONE_ONE && toZoneType == ZoneType.ZONE_ONE))
-            return CapLimitRepository.ZONEONE_ZONEONE_DAILY_CAP;
-        if ((fromZoneType == ZoneType.ZONE_ONE && toZoneType == ZoneType.ZONE_TWO))
-            return CapLimitRepository.ZONEONE_ZONETWO_DAILY_CAP;
-        if ((fromZoneType == ZoneType.ZONE_TWO && toZoneType == ZoneType.ZONE_ONE))
-            return CapLimitRepository.ZONETWO_ZONEONE_DAILY_CAP;
-        if ((fromZoneType == ZoneType.ZONE_TWO && toZoneType == ZoneType.ZONE_TWO))
-            return CapLimitRepository.ZONETWO_ZONETWO_DAILY_CAP;
-        return 0;
-    }
-
-    private int getWeeklyFixedCapLimit(ZoneType fromZoneType, ZoneType toZoneType) {
-        if ((fromZoneType == ZoneType.ZONE_ONE && toZoneType == ZoneType.ZONE_ONE))
-            return CapLimitRepository.ZONEONE_ZONEONE_WEEKLY_CAP;
-        if ((fromZoneType == ZoneType.ZONE_ONE && toZoneType == ZoneType.ZONE_TWO))
-            return CapLimitRepository.ZONEONE_ZONETWO_WEEKLY_CAP;
-        if ((fromZoneType == ZoneType.ZONE_TWO && toZoneType == ZoneType.ZONE_ONE))
-            return CapLimitRepository.ZONETWO_ZONEONE_WEEKLY_CAP;
-        if ((fromZoneType == ZoneType.ZONE_TWO && toZoneType == ZoneType.ZONE_TWO))
-            return CapLimitRepository.ZONETWO_ZONETWO_WEEKLY_CAP;
-        return 0;
-    }
 }

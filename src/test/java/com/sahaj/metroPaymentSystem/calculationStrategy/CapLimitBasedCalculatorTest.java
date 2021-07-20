@@ -23,7 +23,7 @@ class CapLimitBasedCalculatorTest {
     }
 
     @Test
-    void testDailyCapLimitBasedCalculationWithCapping() throws TigerCardException {
+    void dailyCapLimitBasedCalculationWithCapping() throws TigerCardException {
         Trip trip = Trip.addTrip("Monday", 10, 20, 2, 1, false);
         int cappedFare = fareCalculator.dailyCapLimitBasedCalculation(trip, 100, false);
 
@@ -31,7 +31,7 @@ class CapLimitBasedCalculatorTest {
     }
 
     @Test
-    void testDailyCapLimitBasedCalculationWithoutCapping() throws TigerCardException {
+    void dailyCapLimitBasedCalculationWithoutCapping() throws TigerCardException {
         Trip trip = Trip.addTrip("Monday", 10, 20, 2, 1, false);
         int cappedFare = fareCalculator.dailyCapLimitBasedCalculation(trip, 30, false);
 
@@ -39,7 +39,7 @@ class CapLimitBasedCalculatorTest {
     }
 
     @Test
-    void testCalculateFareForOneDay() throws TigerCardException {
+    void calculateFareForOneDay() throws TigerCardException {
         List<Trip> dayTrips = new ArrayList<>();
         Trip trip = Trip.addTrip("Monday", 10, 20, 2, 1, false);
         dayTrips.add(trip);
@@ -51,7 +51,7 @@ class CapLimitBasedCalculatorTest {
     }
 
     @Test
-    void testWeeklyCapLimitBasedCalculation() throws TigerCardException {
+    void weeklyCapLimitBasedCalculation() throws TigerCardException {
         List<Trip> trips = new ArrayList<>();
         Trip trip = Trip.addTrip("Saturday", 10, 20, 1, 1, false);
         trips.add(trip);
@@ -66,7 +66,7 @@ class CapLimitBasedCalculatorTest {
     }
 
     @Test
-    void testCalculateFareForOneWeek() throws TigerCardException {
+    void calculateFareForOneWeek() throws TigerCardException {
         List<Trip> journey = new ArrayList<>();
         Map<Integer, List<Trip>> weeklyTrip = new LinkedHashMap<>();
         //Monday
@@ -100,7 +100,7 @@ class CapLimitBasedCalculatorTest {
     }
 
     @Test
-    void testCalculateFareForMultipleWeeks() throws TigerCardException {
+    void calculateFareForMultipleWeeks() throws TigerCardException {
         List<Trip> journey = new ArrayList<>();
         //Monday
         Trip trip = Trip.addTrip("Monday", 10, 20, 2, 1, false);

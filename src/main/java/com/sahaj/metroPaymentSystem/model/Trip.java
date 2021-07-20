@@ -3,6 +3,7 @@ package com.sahaj.metroPaymentSystem.model;
 import com.sahaj.metroPaymentSystem.Exceptions.TigerCardException;
 import com.sahaj.metroPaymentSystem.enums.ErrorMessages;
 import com.sahaj.metroPaymentSystem.enums.ZoneType;
+import com.sahaj.metroPaymentSystem.repository.CapLimitRepository;
 import com.sahaj.metroPaymentSystem.repository.FareRepository;
 import com.sahaj.metroPaymentSystem.time.Day;
 import com.sahaj.metroPaymentSystem.time.Event;
@@ -55,7 +56,7 @@ public class Trip {
         return trip;
     }
 
-    private int getFixedFare(Event event, Zone fromZone, Zone toZone) {
+    public int getFixedFare(Event event, Zone fromZone, Zone toZone) {
         boolean isPeakHour = event.getTime().isPeakHour(event.getDay().isWeekend());
         if ((fromZone.getZoneType() == ZoneType.ZONE_ONE && toZone.getZoneType() == ZoneType.ZONE_ONE))
             return isPeakHour ? FareRepository.ZONEONE_ZONEONE_PEAK_HOURS : FareRepository.ZONEONE_ZONEONE_OFFPEAK_HOURS;
@@ -65,6 +66,30 @@ public class Trip {
             return isPeakHour ?  FareRepository.ZONETWO_ZONEONE_PEAK_HOURS : FareRepository.ZONETWO_ZONEONE_OFFPEAK_HOURS;
         if ((fromZone.getZoneType() == ZoneType.ZONE_TWO && toZone.getZoneType() == ZoneType.ZONE_TWO))
             return isPeakHour ? FareRepository.ZONETWO_ZONETWO_PEAK_HOURS : FareRepository.ZONETWO_ZONETWO_OFFPEAK_HOURS;
+        return 0;
+    }
+
+    public int getDailyFixedCapLimit(ZoneType fromZoneType, ZoneType toZoneType) {
+        if ((fromZoneType == ZoneType.ZONE_ONE && toZoneType == ZoneType.ZONE_ONE))
+            return CapLimitRepository.ZONEONE_ZONEONE_DAILY_CAP;
+        if ((fromZoneType == ZoneType.ZONE_ONE && toZoneType == ZoneType.ZONE_TWO))
+            return CapLimitRepository.ZONEONE_ZONETWO_DAILY_CAP;
+        if ((fromZoneType == ZoneType.ZONE_TWO && toZoneType == ZoneType.ZONE_ONE))
+            return CapLimitRepository.ZONETWO_ZONEONE_DAILY_CAP;
+        if ((fromZoneType == ZoneType.ZONE_TWO && toZoneType == ZoneType.ZONE_TWO))
+            return CapLimitRepository.ZONETWO_ZONETWO_DAILY_CAP;
+        return 0;
+    }
+
+    public int getWeeklyFixedCapLimit(ZoneType fromZoneType, ZoneType toZoneType) {
+        if ((fromZoneType == ZoneType.ZONE_ONE && toZoneType == ZoneType.ZONE_ONE))
+            return CapLimitRepository.ZONEONE_ZONEONE_WEEKLY_CAP;
+        if ((fromZoneType == ZoneType.ZONE_ONE && toZoneType == ZoneType.ZONE_TWO))
+            return CapLimitRepository.ZONEONE_ZONETWO_WEEKLY_CAP;
+        if ((fromZoneType == ZoneType.ZONE_TWO && toZoneType == ZoneType.ZONE_ONE))
+            return CapLimitRepository.ZONETWO_ZONEONE_WEEKLY_CAP;
+        if ((fromZoneType == ZoneType.ZONE_TWO && toZoneType == ZoneType.ZONE_TWO))
+            return CapLimitRepository.ZONETWO_ZONETWO_WEEKLY_CAP;
         return 0;
     }
 }

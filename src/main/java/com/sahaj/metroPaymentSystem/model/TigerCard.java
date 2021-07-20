@@ -36,8 +36,4 @@ public class TigerCard {
         return instance;
     }
 
-    public static void destroy() {
-        instance = null;
-    }
-
 }

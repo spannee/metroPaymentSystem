@@ -9,10 +9,12 @@ Running all the units tests together will not append all the unit test logs to M
 So I recommend running each unit test one by one like above and then check the MetroPaymentInfo.log file.
 There are unit tests for other classes too apart from what I have mentioned above.
 
+
 OTHER WAYS TO RUN
 
 "./gradlew run" can also be used to run the app. Feel free to define the inputs in MetroPaymentApp.java file before running
 the command. I have already added some sample inputs in the same file.
+
 
 HOW INPUT WORKS
 

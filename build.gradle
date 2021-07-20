@@ -1,3 +1,7 @@
+plugins {
+    id "application"
+}
+
 group 'com.sahaj.metroPaymentSystem'
 version '1.0-SNAPSHOT'
 
@@ -12,17 +16,18 @@ repositories {
 dependencies {
     testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: '5.7.2'
 
-    compileOnly group: 'org.projectlombok', name: 'lombok', version: '1.18.20'
-    annotationProcessor 'org.projectlombok:lombok:1.18.20'
+    compileOnly group: 'org.projectlombok', name: 'lombok', version: '1.18.10'
+    annotationProcessor 'org.projectlombok:lombok:1.18.10'
 
-    testCompileOnly 'org.projectlombok:lombok:1.18.20'
-    testAnnotationProcessor 'org.projectlombok:lombok:1.18.20'
+    testCompileOnly 'org.projectlombok:lombok:1.18.10'
+    testAnnotationProcessor 'org.projectlombok:lombok:1.18.10'
 
     implementation group: 'org.slf4j', name: 'slf4j-api', version: '+'
     implementation group: 'org.slf4j', name: 'slf4j-log4j12', version: '+'
-
-
-
-
 }
+
+application {
+    mainClassName = "com.sahaj.metroPaymentSystem.MetroPaymentApp"
+}
+
 

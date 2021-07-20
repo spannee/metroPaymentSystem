@@ -1,4 +1,4 @@
-package com.sahaj.metroPaymentSystem.calculationStrategy;
+package com.sahaj.metroPaymentSystem.fareCalculationStrategy;
 
 import com.sahaj.metroPaymentSystem.enums.ZoneType;
 import com.sahaj.metroPaymentSystem.model.Trip;

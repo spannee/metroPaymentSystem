@@ -1,7 +1,7 @@
 package com.sahaj.metroPaymentSystem;
 
-import com.sahaj.metroPaymentSystem.calculationStrategy.CapLimitBasedCalculator;
-import com.sahaj.metroPaymentSystem.calculationStrategy.FareCalculator;
+import com.sahaj.metroPaymentSystem.fareCalculationStrategy.CapLimitBasedCalculator;
+import com.sahaj.metroPaymentSystem.fareCalculationStrategy.FareCalculator;
 import com.sahaj.metroPaymentSystem.model.TigerCard;
 import com.sahaj.metroPaymentSystem.model.Trip;
 import lombok.extern.slf4j.Slf4j;

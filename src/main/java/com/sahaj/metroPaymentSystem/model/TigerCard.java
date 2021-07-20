@@ -1,6 +1,6 @@
 package com.sahaj.metroPaymentSystem.model;
 
-import com.sahaj.metroPaymentSystem.calculationStrategy.FareCalculator;
+import com.sahaj.metroPaymentSystem.fareCalculationStrategy.FareCalculator;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
@@ -34,6 +34,10 @@ public class TigerCard {
             }
         }
         return instance;
+    }
+
+    public static void clearInstance() {
+        instance = null;
     }
 
 }

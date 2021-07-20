@@ -1,74 +1,32 @@
-package com.sahaj.metroPaymentSystem.calculationStrategy;
+package com.sahaj.metroPaymentSystem.model;
 
 import com.sahaj.metroPaymentSystem.Exceptions.TigerCardException;
-import com.sahaj.metroPaymentSystem.model.Trip;
+import com.sahaj.metroPaymentSystem.fareCalculationStrategy.CapLimitBasedCalculator;
+import com.sahaj.metroPaymentSystem.fareCalculationStrategy.FareCalculator;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-class CapLimitBasedCalculatorTest {
+class TigerCardTest {
 
-    private CapLimitBasedCalculator fareCalculator;
+    private TigerCard tigerCard;
+
+    private FareCalculator fareCalculator;
 
     @BeforeEach
     void setUp() {
+    }
+
+    @Test
+    void getTwoDayFare() throws TigerCardException {
         fareCalculator = new CapLimitBasedCalculator();
-    }
 
-    @Test
-    void dailyCapLimitBasedCalculationWithCapping() throws TigerCardException {
-        Trip trip = Trip.addTrip("Monday", 10, 20, 2, 1, false);
-        int cappedFare = fareCalculator.dailyCapLimitBasedCalculation(trip, 100, false);
-
-        assertEquals(20, cappedFare);
-    }
-
-    @Test
-    void dailyCapLimitBasedCalculationWithoutCapping() throws TigerCardException {
-        Trip trip = Trip.addTrip("Monday", 10, 20, 2, 1, false);
-        int cappedFare = fareCalculator.dailyCapLimitBasedCalculation(trip, 30, false);
-
-        assertEquals(35, cappedFare);
-    }
-
-    @Test
-    void calculateFareForOneDay() throws TigerCardException {
-        List<Trip> dayTrips = new ArrayList<>();
-        Trip trip = Trip.addTrip("Monday", 10, 20, 2, 1, false);
-        dayTrips.add(trip);
-        trip = Trip.addTrip("Monday", 10, 45, 1, 1, false);
-        dayTrips.add(trip);
-        int totalFare = fareCalculator.calculateFareForOneDay(dayTrips, false);
-
-        assertEquals(60, totalFare);
-    }
-
-    @Test
-    void weeklyCapLimitBasedCalculation() throws TigerCardException {
-        List<Trip> trips = new ArrayList<>();
-        Trip trip = Trip.addTrip("Saturday", 10, 20, 1, 1, false);
-        trips.add(trip);
-        trip = Trip.addTrip("Sunday", 10, 45, 1, 1, false);
-        trips.add(trip);
-        int totalFare = fareCalculator.weeklyCapLimitBasedCalculation(trips, 620, true);
-
-        assertEquals(600, totalFare);
-        assertEquals(trips.stream()
-                .filter(lastTripOfDay -> lastTripOfDay.getEvent().getDay().getDayId() == 7).findFirst().get().getFare(),
-                10);
-    }
-
-    @Test
-    void calculateFareForOneWeek() throws TigerCardException {
         List<Trip> journey = new ArrayList<>();
-        Map<Integer, List<Trip>> weeklyTrip = new LinkedHashMap<>();
         //Monday
         Trip trip = Trip.addTrip("Monday", 10, 20, 2, 1, false);
         journey.add(trip);
@@ -80,9 +38,7 @@ class CapLimitBasedCalculatorTest {
         journey.add(trip);
         trip = Trip.addTrip("Monday", 19, 0, 1, 2, false);
         journey.add(trip);
-        weeklyTrip.put(1, journey);
         //Tuesday
-        journey = new ArrayList<>();
         trip = Trip.addTrip("Tuesday", 10, 20, 2, 1, false);
         journey.add(trip);
         trip = Trip.addTrip("Tuesday", 10, 45, 1, 1, false);
@@ -93,14 +49,15 @@ class CapLimitBasedCalculatorTest {
         journey.add(trip);
         trip = Trip.addTrip("Tuesday", 19, 0, 1, 2, false);
         journey.add(trip);
-        weeklyTrip.put(2, journey);
-        int totalFare = fareCalculator.calculateFareForOneWeek(weeklyTrip);
 
-        assertEquals(240, totalFare);
+        tigerCard = TigerCard.getInstance(journey, fareCalculator);
+        assertEquals(tigerCard.getTotalFare(), 240);
     }
 
     @Test
-    void calculateFareForMultipleWeeks() throws TigerCardException {
+    void getMultiWeekFare() throws TigerCardException {
+        fareCalculator = new CapLimitBasedCalculator();
+
         List<Trip> journey = new ArrayList<>();
         //Monday
         Trip trip = Trip.addTrip("Monday", 10, 20, 2, 1, false);
@@ -175,13 +132,13 @@ class CapLimitBasedCalculatorTest {
         journey.add(trip);
         trip = Trip.addTrip("Monday", 19, 0, 1, 2, false);
         journey.add(trip);
-        int totalFare = fareCalculator.calculateFareForMultipleWeeks(journey);
 
-        assertEquals(720, totalFare);
+        tigerCard = TigerCard.getInstance(journey, fareCalculator);
+        assertEquals(tigerCard.getTotalFare(), 720);
     }
 
     @AfterEach
     void tearDown() {
-        fareCalculator = null;
+        TigerCard.clearInstance();
     }
 }
